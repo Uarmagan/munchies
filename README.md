@@ -35,20 +35,13 @@ Server caching reduces calls to the external API. Client caching reduces calls t
 - **Using Next.js API Route as a proxy to the external API** — Handles CORS, enables server-side caching, hides external API details from the client
 - **Client Components with useQuery** — Data fetching happens on the client with TanStack Query. This allows for really nice DX for loading and error states.
 
-## Project Structure
-
-```
-app/api/        → Proxy routes (restaurants, filters)
-components/     → UI components
-types/          → TypeScript interfaces
-```
 
 ## Trade-offs
 
 - **Framework caching over custom implementation** — Used Next.js `revalidate` instead of a custom Map with TTL. More robust, but doesn't demonstrate building a cache from scratch.
 - **Client-side filtering over server-side** — Used `useMemo` to filter restaurants on the client side. This is more efficient than filtering on the server side, but it requires more code to implement.
 - - **Local state over URL state** — Filters in `useState`, not URL params. Simpler, but filters aren't shareable or bookmarkable.
-- **Visual completeness over functional completeness** — Built delivery time/price range UI per Figma, but only category filtering works (assessment only required one filter type).
+- **UI completed, but functionality incomplete** — Built delivery time/price range UI per Figma, but only category filtering works (assessment only required one filter type).
 - **Error handling** — Only basic error handling for API requests. No retry logic or fallback strategies.
 
 ## Future Improvements
