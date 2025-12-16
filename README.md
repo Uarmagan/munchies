@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Munchies
+
+Restaurant discovery app with category filtering.
+
+## Tech Stack
+
+- Next.js
+- TypeScript
+- Tailwind CSS + shadcn/ui
+- TanStack Query
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Caching Strategy
 
-## Learn More
+The app uses two-layer caching:
 
-To learn more about Next.js, take a look at the following resources:
+- **Server layer**: Route Handlers with `revalidate: 300` (5 min)
+- **Client layer**: TanStack Query with `staleTime: 5 min`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Server caching reduces calls to the external API. Client caching reduces calls to our own Route Handlers.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Key Decisions
 
-## Deploy on Vercel
+- **Single full-stack framework** — Next.js handles both proxy (Route Handlers) and frontend, avoiding the complexity of having two separate apps (e.g. Node.js proxy server + separate frontend app connected with Docker Compose).
+- **Using Next.js API Route as a proxy to the external API** — Handles CORS, enables server-side caching, hides external API details from the client
+- **Client Components with useQuery** — Data fetching happens on the client with TanStack Query. This allows for really nice DX for loading and error states.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Structure
+
+```
+app/api/        → Proxy routes (restaurants, filters)
+components/     → UI components
+types/          → TypeScript interfaces
+```
+
+## Trade-offs
+
+- Sidebar delivery time and price range filters are visual-only (not connected to state)
+- Food category filtering works on both filter bar and sidebar
+
+## Future Improvements
+
+- Add open/closed status from API
+- Implement delivery time / price range filtering
+- Add Suspense-based loading/error states with `useSuspenseQuery` and Error Boundaries
+- Add tests (Jest) and mock external API with MSW
+- Pixel-perfect design matching with Figma
+- Normalize delivery times to ranges (e.g. "5-10 min", "20-45 min", "1 hour+")
